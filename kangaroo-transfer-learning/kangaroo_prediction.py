@@ -28,11 +28,11 @@ model = mrcnn.model.MaskRCNN(mode="inference",
                              model_dir=os.getcwd())
 
 # Load the weights into the model.
-model.load_weights(filepath="shellfish_mask_rcnn_trained.h5", 
+model.load_weights(filepath="new_mrcnn\\shellfish_mask_rcnn_modelFINAL.h5", 
                    by_name=True)
 
 # load the input image, convert it from BGR to RGB channel
-image = cv2.imread("kangaroo-transfer-learning\\kangaroo\\Ground_Truth.jpg")
+image = cv2.imread("Ground_Truth.jpg")
 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
 # Perform a forward pass of the network to obtain the results

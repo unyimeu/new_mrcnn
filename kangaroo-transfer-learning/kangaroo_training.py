@@ -1,17 +1,19 @@
 import os
 import xml.etree
 from numpy import zeros, asarray
-
-import mrcnn.utils
-import mrcnn.config
-import mrcnn.model
+#import random
+import utils
+import config
+#import copy_model
+import model 
+import numpy as np
 
 #import tensorflow as tf
 
 #For this script to run on the GPU, you must install CUDA, CUDANN, and tensorflow -gpu(it has a tensorflow backend)
 #can still run on cpu but it will take about 1 hr per epoch :(
-
-class ShellfishDataset(mrcnn.utils.Dataset):
+model.say_hello()
+class ShellfishDataset(utils.Dataset):
 
     def load_dataset(self, dataset_dir, is_train=True):
         # Adds information (image ID, image path, and annotation file path) about each image in a dictionary.
@@ -19,15 +21,29 @@ class ShellfishDataset(mrcnn.utils.Dataset):
         #self.add_class("dataset", 2, "Healthy")
 
         images_dir = dataset_dir + 'images\\'
-        annotations_dir = dataset_dir + 'annots\\'
+        annotations_dir = dataset_dir + 'annotations\\'
+
+        # Generate the list of numbers from 1 to 627
+        numbers = np.arange(1, 628)
+        # Shuffle the numbers randomly
+        np.random.shuffle(numbers)
+        # Calculate the split index
+        split_index = int(len(numbers) * 0.8)
+        # Split the numbers into two lists
+        list_80 = numbers[:split_index]
+        list_20 = numbers[split_index:]
+        # Convert numpy arrays to lists
+        list_80 = list(list_80)
+        list_20 = list(list_20)
+
 
         for filename in os.listdir(images_dir):
             image_id = filename[:-4]
 
-            if is_train and int(image_id) >= 35:
+            if is_train and int(image_id) in list_20:
                 continue
 
-            if not is_train and int(image_id) < 35:
+            if not is_train and int(image_id) in list_80:
                 continue
 
             img_path = images_dir + filename
@@ -95,7 +111,7 @@ class ShellfishDataset(mrcnn.utils.Dataset):
         height = int(root.find('.//size/height').text)
         return boxes, width, height
 
-class ShellfishConfig(mrcnn.config.Config):
+class ShellfishConfig(config.Config):
     NAME = "shellfish_cfg"
 
     GPU_COUNT = 1
@@ -103,7 +119,7 @@ class ShellfishConfig(mrcnn.config.Config):
     
     NUM_CLASSES = 2
 
-    STEPS_PER_EPOCH = 131
+    STEPS_PER_EPOCH = 100
 
 # Train
 train_dataset = ShellfishDataset()
@@ -119,33 +135,25 @@ validation_dataset.prepare()
 shellfish_config = ShellfishConfig()
 
 # Build the Mask R-CNN Model Architecture
-model = mrcnn.model.MaskRCNN(mode='training', 
+model = model.MaskRCNN(mode='training', 
                              model_dir='.\\', 
                              config=shellfish_config)
 
-model.load_weights(filepath='kangaroo-transfer-learning\\mask_rcnn_coco.h5', 
+model.load_weights(filepath='new_mrcnn\\kangaroo-transfer-learning\\mask_rcnn_coco.h5', 
                    by_name=True, 
                    exclude=["mrcnn_class_logits", "mrcnn_bbox_fc",  "mrcnn_bbox", "mrcnn_mask"])
 
 
 
-import imgaug.augmenters as iaa
-
-augmentation = iaa.Sequential([
-            iaa.Fliplr(0.5),  # Horizontal flips
-            iaa.Affine(rotate=(-50, 50)),  # Rotations
-            iaa.Affine(translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)}),  # Translations
-            iaa.Affine(scale=(1.0, 2.0))  # Scaling
-            ], random_order=True) # apply augmenters in random order
-
 print('=========STARTING TRAINGING=========')
 model.train(train_dataset=train_dataset, 
             val_dataset=validation_dataset, 
             learning_rate=shellfish_config.LEARNING_RATE, 
-            epochs=3, 
+            epochs=15, 
             layers='heads',
             #augmentation=augmentation
             )
 
-model_path = 'shellfish_mask_rcnn_trained.h5'
+model_path = 'kangaroo-transfer-learning\\kangaroo\\shellfish_mask_rcnn_modelTEST2.h5'
+model_path = "C:\\Users\\Unyim\\Downloads\\testttt\\new_mrcnn\\shellfish_mask_rcnn_modelFINAL.h5"
 model.keras_model.save_weights(model_path)

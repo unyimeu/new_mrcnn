@@ -34,7 +34,8 @@ assert LooseVersion(keras.__version__) >= LooseVersion('2.0.8')
 ############################################################
 #  Utility Functions
 ############################################################
-
+def say_hello():
+    print('HELLOOOO')
 def log(text, array=None):
     """Prints a text message. And, optionally, if a Numpy array is provided it
     prints it's shape, min, and max values.
@@ -2276,8 +2277,8 @@ class MaskRCNN():
         # Directory for training logs
 #        self.log_dir = os.path.join(self.model_dir, "{}{:%Y%m%dT%H%M}".format(
 #            self.config.NAME.lower(), now))
-        self.log_dir = "//logdir//train"
-
+        self.log_dir = "tb_logs\\train"
+        print('    HELOOOOOOOOOOOOOOOOOOOOOOOOOOOOO')
         # Path to save after each epoch. Include placeholders that get filled by Keras.
         self.checkpoint_path = os.path.join(self.log_dir, "mask_rcnn_{}_*epoch*.h5".format(
             self.config.NAME.lower()))
@@ -2319,7 +2320,7 @@ class MaskRCNN():
             defined in the Dataset class.
         """
         assert self.mode == "training", "Create model in training mode."
-
+        print('    HELOOOOOOOOOOOOOOOOOOOOOOOOOOOOO 2')
         # Pre-defined layer regular expressions
         layer_regex = {
             # all layers but the backbone
